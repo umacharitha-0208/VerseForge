@@ -1,0 +1,60 @@
+[
+  {
+    "name": "Auto-Separate Songs from Inbox",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 2
+              }
+            ]
+          }
+        },
+        "id": "schedule-trigger-1",
+        "name": "Every 2 Minutes",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          240,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://127.0.0.1:8000/api/songs/separate-from-inbox",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ { \"webhook_url\": \"http://127.0.0.1:5678/webhook/song-separated\" } }}",
+          "options": {}
+        },
+        "id": "http-request-1",
+        "name": "Scan Inbox & Separate",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          460,
+          300
+        ]
+      }
+    ],
+    "connections": {
+      "Every 2 Minutes": {
+        "main": [
+          [
+            {
+              "node": "Scan Inbox & Separate",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {},
+    "active": false
+  }
+]
