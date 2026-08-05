@@ -1,0 +1,24 @@
+.env
+data/*.db
+storage/uploads/*
+storage/stems/*
+storage/videos/*
+storage/generated/*
+!storage/uploads/.gitkeep
+!storage/stems/.gitkeep
+!storage/videos/.gitkeep
+!storage/generated/.gitkeep
+__pycache__/
+*.pyc
+.venv/
+.tools/
+n8n.log
+backend.log
+frontend.log
+
+# Separate, unrelated research project living alongside this app in the same working directory.
+multimodal_sentiment/
+n8n_inbox/
+
+.claude/
+download_grafana.*
