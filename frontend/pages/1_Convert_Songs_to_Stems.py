@@ -31,13 +31,14 @@ title = st.text_input("Title for this song", value="")
 
 stem_mode = st.radio(
     "How many stems?",
-    ["6 (vocals/drums/bass/guitar/piano/other) — as many as possible", "4 (vocals/drums/bass/other) — faster"],
+    ["4 (vocals/drums/bass/other) — faster, lighter (default)", "6 (vocals/drums/bass/guitar/piano/other) — as many as possible"],
 )
 stem_count = "6" if stem_mode.startswith("6") else "4"
 st.caption(
-    "Note: 6-stem is the most any public separation model offers. Finer categories (choir, "
-    "brass, synth, sitar, etc.) aren't achievable with open tools -- that requires proprietary "
-    "tech."
+    "4-stem uses a smaller model -- less memory and time per job, which is why it's the "
+    "default on a shared/memory-constrained deployment. Pick 6-stem if you specifically need "
+    "guitar/piano isolated. 6-stem is the most any public separation model offers -- finer "
+    "categories (choir, brass, synth, sitar, etc.) aren't achievable with open tools."
 )
 
 ready = uploaded is not None or bool(song_url.strip())

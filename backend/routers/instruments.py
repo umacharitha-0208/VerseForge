@@ -91,7 +91,9 @@ def create(payload: InstrumentCreateIn, background_tasks: BackgroundTasks):
         {"description": payload.description, "title": title_final, "family": payload.family},
         payload.webhook_url,
     )
-    background_tasks.add_task(run_job, job_id, _do_create, payload.description, title_final, payload.family)
+    background_tasks.add_task(
+        run_job, job_id, _do_create, payload.description, title_final, payload.family, heavy=True
+    )
     return {"job_id": job_id}
 
 

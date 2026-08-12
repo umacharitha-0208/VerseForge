@@ -47,7 +47,10 @@ DEMUCS_MODELS = {
     "4": {"name": "htdemucs", "stems": ["vocals", "drums", "bass", "other"]},
     "6": {"name": "htdemucs_6s", "stems": ["vocals", "drums", "bass", "guitar", "piano", "other"]},
 }
-DEFAULT_STEM_COUNT = "6"
+# 4-stem (htdemucs) instead of 6-stem (htdemucs_6s) by default -- smaller model, less memory
+# and compute per job, which matters on a memory-constrained shared host (e.g. HF Spaces' free
+# tier). Users who want guitar/piano stems can still explicitly pick "6" per request.
+DEFAULT_STEM_COUNT = "4"
 
 # Agentic refine-loop defaults
 REFINE_MAX_ITERATIONS = int(os.environ.get("REFINE_MAX_ITERATIONS", "3"))

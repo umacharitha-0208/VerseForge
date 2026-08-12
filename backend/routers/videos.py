@@ -80,7 +80,9 @@ async def analyze(
         shutil.copyfileobj(file.file, f)
 
     job_id = db.create_job("analyze_video", {"filename": file.filename, "title": title_final}, webhook_url)
-    background_tasks.add_task(run_job, job_id, _do_analyze, str(dest_path), title_final, None, language or None)
+    background_tasks.add_task(
+        run_job, job_id, _do_analyze, str(dest_path), title_final, None, language or None, heavy=True
+    )
     return {"job_id": job_id}
 
 
@@ -97,7 +99,7 @@ def analyze_url(payload: VideoAnalyzeUrlIn, background_tasks: BackgroundTasks):
     title_final = payload.title.strip()
     job_id = db.create_job("analyze_video_url", {"url": payload.url, "title": title_final}, payload.webhook_url)
     background_tasks.add_task(
-        run_job, job_id, _do_download_and_analyze, payload.url, title_final, payload.language or None
+        run_job, job_id, _do_download_and_analyze, payload.url, title_final, payload.language or None, heavy=True
     )
     return {"job_id": job_id}
 

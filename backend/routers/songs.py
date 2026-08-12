@@ -61,7 +61,7 @@ async def separate(
     job_id = db.create_job(
         "separate_song", {"filename": file.filename, "title": title_final, "stem_count": stem_count}, webhook_url
     )
-    background_tasks.add_task(run_job, job_id, _do_separate, str(dest_path), title_final, stem_count)
+    background_tasks.add_task(run_job, job_id, _do_separate, str(dest_path), title_final, stem_count, heavy=True)
     return {"job_id": job_id}
 
 
@@ -82,7 +82,7 @@ def separate_url(payload: SongSeparateUrlIn, background_tasks: BackgroundTasks):
         payload.webhook_url,
     )
     background_tasks.add_task(
-        run_job, job_id, _do_download_and_separate, payload.url, title_final, payload.stem_count
+        run_job, job_id, _do_download_and_separate, payload.url, title_final, payload.stem_count, heavy=True
     )
     return {"job_id": job_id}
 
@@ -109,7 +109,7 @@ def separate_from_inbox(payload: InboxScanIn, background_tasks: BackgroundTasks)
         job_id = db.create_job(
             "separate_song", {"filename": path.name, "title": title, "stem_count": payload.stem_count}, payload.webhook_url
         )
-        background_tasks.add_task(run_job, job_id, _do_separate, str(dest_path), title, payload.stem_count)
+        background_tasks.add_task(run_job, job_id, _do_separate, str(dest_path), title, payload.stem_count, heavy=True)
         created_jobs.append({"job_id": job_id, "filename": path.name})
 
     return {"scanned": True, "jobs_created": len(created_jobs), "jobs": created_jobs}
