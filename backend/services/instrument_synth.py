@@ -3,17 +3,12 @@ then numpy/scipy render playable note samples across a wide pitch range. Impleme
 parametric synthesis rather than a generative-audio model, since no such model is available in
 this environment.
 
-- "generic": additive detuned oscillators + ADSR + filter + vibrato. Internal fallback family
-  (used if an unrecognized family string is ever passed in) -- not exposed as its own page.
-- "guitar": Karplus-Strong plucked-string physical model (a feedback delay line seeded with
-  filtered noise), producing a natural pluck-and-decay character. Superseded by
-  soundfont_synth.py's real sampled audio for the actual GuitarGPT page -- kept here only as
-  the "generic" family's unreachable-but-harmless sibling, not otherwise used.
-
-(A "violin" bowed-string DSP engine used to live here too; removed at the user's request after
-repeated dissatisfaction with pure-synthesis violin -- GuitarGPT/ViolinGPT both moved to real
-sampled audio (soundfont_synth.py), and the ViolinGPT page itself was removed entirely.)
-"""
+Only the "generic" family lives here now (additive detuned oscillators + ADSR + filter +
+vibrato) -- an internal fallback used if an unrecognized family string is ever passed in, not
+exposed as its own page. GuitarGPT (the only instrument-creation page) uses real sampled audio
+via soundfont_synth.py instead; earlier pure-DSP engines for guitar (Karplus-Strong) and violin
+(bowed-string model) were removed after real-instrument comparison showed neither convincingly
+sounded like the real thing."""
 
 import json
 import re
@@ -48,11 +43,6 @@ FAMILY_DEFAULTS = {
         "vibrato_depth_semitones": 0.0,
         "brightness": 0.5,
     },
-    "guitar": {
-        "damping": 0.6,
-        "brightness": 0.5,
-        "release": 0.15,
-    },
 }
 
 # Distinct JSON schemas per family so the LLM is asked for parameters that actually matter
@@ -67,11 +57,6 @@ FAMILY_PROMPTS = {
         '"filter_type": "lowpass"|"highpass"|"none", "filter_cutoff_hz": <200-12000>, '
         '"vibrato_rate_hz": <0-8>, "vibrato_depth_semitones": <0-0.5>, '
         '"brightness": <0-1, higher = more harmonic overtones mixed in>}'
-    ),
-    "guitar": (
-        '{"damping": <0-1, 0=muted/quick decay, 1=long ringing sustain>, '
-        '"brightness": <0-1, pluck attack sharpness/high-end content>, '
-        '"release": <seconds, 0.05-0.5, final fade-out length>}'
     ),
 }
 
@@ -186,45 +171,6 @@ def _synthesize_additive(params: dict, midi_note: int, duration_sec: float, sr: 
     return mix.astype(np.float32)
 
 
-def _synthesize_pluck(params: dict, midi_note: int, duration_sec: float, sr: int) -> np.ndarray:
-    """Karplus-Strong: a short noise burst circulates through a delay line whose length sets
-    the pitch; each pass through the loop gets averaged (low-pass) and scaled (damping),
-    which is what produces the natural pluck-then-decay, brighter-then-duller character."""
-    freq = _midi_to_freq(midi_note)
-    n_samples = int(duration_sec * sr)
-    period_samples = max(int(round(sr / freq)), 2)
-
-    damping = min(max(float(params.get("damping", 0.6)), 0.0), 1.0)
-    brightness = min(max(float(params.get("brightness", 0.5)), 0.0), 1.0)
-    decay_factor = 0.9 + 0.099 * damping
-
-    buf = np.random.uniform(-1.0, 1.0, period_samples)
-    if brightness < 0.99:
-        smooth_window = max(1, int(round((1 - brightness) * 6)) + 1)
-        kernel = np.ones(smooth_window) / smooth_window
-        buf = np.convolve(buf, kernel, mode="same")
-
-    output = np.empty(n_samples, dtype=np.float64)
-    idx = 0
-    for i in range(n_samples):
-        cur = buf[idx]
-        output[i] = cur
-        nxt = buf[(idx + 1) % period_samples]
-        buf[idx] = decay_factor * 0.5 * (cur + nxt)
-        idx = (idx + 1) % period_samples
-
-    release = params.get("release", 0.15)
-    release_n = max(int(release * sr), 1)
-    if release_n < n_samples:
-        fade = np.ones(n_samples)
-        fade[-release_n:] = np.linspace(1, 0, release_n)
-        output *= fade
-
-    peak = np.max(np.abs(output)) or 1.0
-    output = output / peak * 0.9
-    return output.astype(np.float32)
-
-
 def synthesize_note(
     params: dict,
     midi_note: int,
@@ -232,8 +178,6 @@ def synthesize_note(
     sr: int = SAMPLE_RATE,
     family: str = "generic",
 ) -> np.ndarray:
-    if family == "guitar":
-        return _synthesize_pluck(params, midi_note, duration_sec, sr)
     return _synthesize_additive(params, midi_note, duration_sec, sr)
 
 

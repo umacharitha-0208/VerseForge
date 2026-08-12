@@ -32,9 +32,9 @@ GEMINI_OPENAI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/opena
 DEMUCS_MODEL = os.environ.get("DEMUCS_MODEL", "htdemucs")
 WHISPER_MODEL_SIZE = os.environ.get("WHISPER_MODEL_SIZE", "base")
 
-# Portable FluidSynth binary + General MIDI SoundFont, used for sample-based instrument
-# synthesis (GuitarGPT/ViolinGPT) -- real recorded samples instead of hand-rolled DSP, since
-# the latter can't produce a convincingly realistic instrument timbre on its own.
+# Portable FluidSynth binary + General MIDI SoundFont, used for GuitarGPT's sample-based
+# instrument synthesis -- real recorded samples instead of hand-rolled DSP, since the latter
+# can't produce a convincingly realistic instrument timbre on its own.
 FLUIDSYNTH_DLL_DIR = BASE_DIR / ".tools" / "fluidsynth" / "fluidsynth-v2.5.7-win10-x64-cpp11" / "bin"
 SOUNDFONT_PATH = BASE_DIR / ".tools" / "soundfonts" / "FluidR3_GM.sf2"
 

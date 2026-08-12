@@ -7,9 +7,6 @@ sound like the real thing. FluidSynth renders actual sampled recordings instead.
 Trade-off: a text description can no longer invent arbitrary timbre -- it now picks among a
 curated list of real GM guitar articulations plus expression parameters (velocity/vibrato)
 that soundfont playback actually supports.
-
-(ViolinGPT/the "violin" family used this same engine but was removed at the user's request
-after repeated dissatisfaction with the result -- GM_PROGRAMS only lists guitar now.)
 """
 
 import json

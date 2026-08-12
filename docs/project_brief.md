@@ -33,11 +33,10 @@ song localization, and generative audio apps (e.g. Fadr, LALAL.AI).
 - **Chatbot-style manual refinement**: quick-action presets (make it darker, shorter,
   more rhythmic...) + freeform chat, one LLM call per turn, separate from the automated
   critique loop
-- **Text-to-instrument synthesis** (Siren / GuitarGPT / ViolinGPT): Gemini interprets a
-  text description into synth parameters; additive oscillator + ADSR + filter + vibrato
-  engine for generic/violin timbres, Karplus-Strong plucked-string physical model for
-  guitar — rendered across a 5-octave note bank, played via an embedded QWERTY-keyboard
-  web component
+- **Text-to-instrument synthesis** (GuitarGPT): Gemini interprets a text description into
+  a real instrument patch + expression parameters (velocity, vibrato); FluidSynth renders
+  actual sampled audio from a General MIDI SoundFont, not synthesized approximation —
+  rendered across a 5-octave note bank, played via an embedded QWERTY-keyboard web component
 - **Emotional TTS**: prosody-based emotion presets (rate/pitch/volume) over Edge TTS
   neural voices; gTTS fallback for languages with no neural voice available (Punjabi)
 
@@ -50,7 +49,7 @@ song localization, and generative audio apps (e.g. Fadr, LALAL.AI).
   endpoint so AutoGen's native client works without a proxy
 - edge-tts, gTTS, yt-dlp
 - SQLite (persistence), FastAPI `BackgroundTasks` job queue
-- n8n (workflow automation), Dockerfile + docker-compose (containerization-ready)
+- n8n (workflow automation), Docker (deployed to Hugging Face Spaces)
 
 ## Ops & Cost Involvement
 
@@ -81,5 +80,5 @@ inference-cost and job-orchestration, not experiment tracking)*
   editing, cached for repeat requests
 - Emotion-tunable TTS mixed with a song's instrumental (paired playback or spoken-word
   overlay)
-- Siren / GuitarGPT / ViolinGPT: text-to-instrument playable virtual keyboard
+- GuitarGPT: text-to-instrument playable virtual keyboard
 - Full FastAPI backend + Streamlit frontend + n8n automation scaffold + Docker packaging

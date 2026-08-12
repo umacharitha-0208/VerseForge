@@ -177,7 +177,7 @@ def list_mixes() -> list:
     return r.json()
 
 
-# --- instruments (Siren) ------------------------------------------------------
+# --- instruments (GuitarGPT) ---------------------------------------------------
 
 def create_instrument(description: str, title: str, family: str = "generic") -> int:
     r = requests.post(

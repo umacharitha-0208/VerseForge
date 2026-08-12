@@ -1,5 +1,6 @@
-"""Shared renderer for the Siren / GuitarGPT / ViolinGPT pages -- same 'describe it, play it
-on a keyboard' UX, each page just fixes the synthesis family and its branding."""
+"""Shared renderer for text-to-instrument pages ('describe it, play it on a keyboard') --
+currently only GuitarGPT uses this, but it's kept generic so a future instrument page just
+fixes the synthesis family and its branding rather than duplicating this UI."""
 
 import json
 

@@ -71,7 +71,7 @@ def _do_create(description: str, title: str, family: str) -> dict:
     params = interpret_description(description, family)
     instrument_id = db.add_instrument(title, description, family, json.dumps(params), "")
     notes_dir = GENERATED_DIR / "instruments" / str(instrument_id)
-    notes = render_instrument(params, notes_dir, family)
+    render_instrument(params, notes_dir, family)
     db.update_instrument_notes_dir(instrument_id, str(notes_dir))
     return {
         "instrument_id": instrument_id,

@@ -15,7 +15,6 @@ uvicorn
 python-multipart
 httpx
 requests
-google-genai
 llama-index-core
 llama-index-llms-google-genai
 ag2

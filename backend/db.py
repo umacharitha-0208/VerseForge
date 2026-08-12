@@ -202,11 +202,6 @@ def add_stem(song_id: int, stem_type: str, file_path: str) -> int:
         return cur.lastrowid
 
 
-def get_song(song_id: int):
-    with get_conn() as conn:
-        return conn.execute("SELECT * FROM songs WHERE id = ?", (song_id,)).fetchone()
-
-
 def list_songs():
     with get_conn() as conn:
         return conn.execute("SELECT * FROM songs ORDER BY uploaded_at DESC").fetchall()
@@ -350,11 +345,6 @@ def list_lyrics():
         return conn.execute("SELECT * FROM lyrics ORDER BY created_at DESC").fetchall()
 
 
-def get_stem(stem_id: int):
-    with get_conn() as conn:
-        return conn.execute("SELECT * FROM stems WHERE id = ?", (stem_id,)).fetchone()
-
-
 def add_mix(
     lyrics_id: int,
     stem_id: int,
@@ -416,7 +406,7 @@ def list_mixes():
         ).fetchall()
 
 
-# --- instruments (Siren) ----------------------------------------------------
+# --- instruments (GuitarGPT) -------------------------------------------------
 
 def add_instrument(title: str, description: str, family: str, params_json: str, notes_dir: str) -> int:
     with get_conn() as conn:
