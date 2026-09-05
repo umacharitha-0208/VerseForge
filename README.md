@@ -36,6 +36,8 @@ media delivery.
 - Generates lyrics from an idea, theme, or existing text.
 - Supports English, Hindi, Telugu, Punjabi, and same-as-input language generation.
 - Supports native scripts and romanized output where applicable.
+- Uses an AutoGen critic-editor loop to score generated lyrics, identify issues, and revise the
+	draft until it reaches the configured quality threshold.
 - Provides conversational editing for requests such as making lyrics darker, shorter, or more
 	rhythmic.
 - Stores generated lyrics and chat history in SQLite.
