@@ -141,6 +141,7 @@ not a guaranteed percentage for every workload.
 
 - Streamlit Community Cloud as the primary deployment target
 - `packages.txt` for FFmpeg and FluidSynth system packages
+- Docker is not required for this project or its Streamlit Cloud deployment.
 
 ## Project structure
 
@@ -162,7 +163,6 @@ project2/
 ├── data/                       Runtime SQLite database, created automatically
 ├── storage/                    Runtime uploads and generated media
 ├── .streamlit/config.toml      Streamlit UI configuration
-├── docs/project_brief.md       Extended product and architecture brief
 ├── packages.txt               Streamlit Cloud system packages
 ├── requirements.txt            Python dependencies
 ├── .env.example                Local environment template
@@ -210,6 +210,10 @@ reports whether Gemini is configured and whether CUDA is available.
 
 ## Deploy on Streamlit Community Cloud
 
+This project is deployed directly with Streamlit Cloud. It does not use Docker, a separate
+FastAPI server, or additional launch scripts. The Streamlit entrypoint starts the FastAPI
+backend internally through `frontend/backend_runtime.py`.
+
 1. Push the repository to GitHub.
 2. Open [share.streamlit.io](https://share.streamlit.io).
 3. Create a new app from the repository.
@@ -220,6 +224,64 @@ reports whether Gemini is configured and whether CUDA is available.
 No separate backend URL is required for the default deployment. The Streamlit process starts
 the FastAPI backend locally in the same environment. Set `BACKEND_BASE_URL` only if the API is
 hosted as a separate service.
+
+## Project brief
+
+### Goal
+
+VerseForge separates songs into stems, understands music videos across text, audio, and visual
+modalities, generates and localizes lyrics across languages and scripts, synthesizes expressive
+vocal performances, and creates custom playable instruments from text descriptions. It is built
+around real creator-tool workflows for music production, song localization, and generative audio.
+
+### Input sources
+
+- Uploaded audio or video files. FFmpeg and Demucs handle supported format conversion.
+- URLs supported by yt-dlp, including YouTube and other compatible sites.
+- No training dataset is required; the application runs pretrained models against user-supplied
+	content.
+
+### Core concepts and models
+
+- **Source separation:** Demucs `htdemucs` provides four stems, while `htdemucs_6s` adds guitar
+	and piano for six stems.
+- **Vocal splitting:** librosa pitch tracking and harmonic masking estimate lead versus
+	background vocals. This is a DSP heuristic, not a trained classifier.
+- **Transcription:** faster-whisper transcribes speech and sung vocals.
+- **Video analysis:** OpenCV keyframes, Whisper transcripts, and librosa tempo, energy, and
+	brightness features are combined for Gemini multimodal synthesis.
+- **Agentic refinement:** AutoGen drives a generate, critique, and revise loop with an editor
+	agent that scores its output against a configured threshold.
+- **Cross-language generation:** English, Hindi, Telugu, Punjabi, and same-as-input generation
+	are supported with native-script or romanized output.
+- **Manual refinement:** Lyrics can be edited through quick actions or free-form chat.
+- **Instrument synthesis:** Gemini interprets the instrument description, then FluidSynth renders
+	a five-octave note bank from the FluidR3 General MIDI SoundFont.
+- **Emotional TTS:** Edge TTS uses prosody presets for rate, pitch, and volume, with gTTS as a
+	fallback where a neural voice is unavailable.
+
+### Operations and cost controls
+
+- Background jobs move through `pending`, `running`, `done`, or `error` states while the
+	frontend polls for completion.
+- Optional webhook callbacks can notify external callers when jobs finish.
+- Exact-match caching skips repeated work for unchanged inputs and settings.
+- Critique and revision are combined into one model response, reducing the default worst-case
+	refinement loop from seven calls to four, approximately 40% fewer calls.
+- `REFINE_MAX_ITERATIONS=0` enables lower-cost single-shot generation.
+- The `LLM_MODEL` environment variable allows the Gemini model to be changed without code
+	changes as quotas and model availability evolve.
+- SQLite schema migrations are additive, so new columns can be introduced without deleting
+	existing application data.
+
+### Deliverables
+
+- Four- or six-stem song separation with lead/background vocal splitting.
+- Multimodal video analysis with transcript, keyframes, music features, and semantic summary.
+- Multilingual, multi-script lyrics generation with chat refinement and caching.
+- Emotion-tunable TTS paired with an instrumental or mixed as a spoken-word overlay.
+- GuitarGPT text-to-instrument generation with a playable virtual keyboard.
+- FastAPI backend, Streamlit frontend, and direct Streamlit Community Cloud deployment.
 
 ## Runtime and deployment limitations
 
