@@ -1,10 +1,12 @@
 import streamlit as st
 
 import api_client
+from backend_runtime import ensure_backend
 from theme import apply_theme
 
 st.set_page_config(page_title="VerseForge", page_icon="🎵", layout="wide")
 apply_theme()
+ensure_backend(api_client.BASE_URL)
 
 st.title("🎵 VerseForge")
 st.markdown(

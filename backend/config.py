@@ -60,13 +60,6 @@ BACKEND_HOST = os.environ.get("BACKEND_HOST", "127.0.0.1")
 BACKEND_PORT = int(os.environ.get("BACKEND_PORT", "8000"))
 BACKEND_BASE_URL = os.environ.get("BACKEND_BASE_URL", f"http://{BACKEND_HOST}:{BACKEND_PORT}")
 
-# Folder n8n's schedule-triggered workflow watches for new songs to auto-separate.
-N8N_INBOX_DIR = BASE_DIR / "n8n_inbox"
-N8N_INBOX_SONGS_DIR = N8N_INBOX_DIR / "songs"
-N8N_INBOX_SONGS_PROCESSED_DIR = N8N_INBOX_DIR / "songs_processed"
-for d in (N8N_INBOX_SONGS_DIR, N8N_INBOX_SONGS_PROCESSED_DIR):
-    d.mkdir(parents=True, exist_ok=True)
-
 # --- Lyrics: languages, voices, emotion ------------------------------------------------
 
 SUPPORTED_LANGUAGES = {

@@ -1,22 +1,11 @@
-# Portable dev-only tools (Node, n8n, Prometheus, Grafana, the local FluidSynth binary +
-# soundfont used for Windows dev) -- multiple GB, irrelevant to the container image, which
-# installs fluidsynth via apt and fetches the soundfont fresh (see Dockerfile).
-.tools/
-
-# Separate, unrelated research project -- not part of this app's Space.
-multimodal_sentiment/
-
-# Runtime data/generated media -- created fresh inside the container.
-data/
-storage/
-n8n_inbox/
-
-# n8n workflow definitions -- not used by the Space itself.
-n8n/
-
 .git/
 .gitignore
+.env
 __pycache__/
 *.pyc
 .venv/
-*.log
+data/*
+storage/*
+.tools/
+docs/
+verseforge_simple_flow.png

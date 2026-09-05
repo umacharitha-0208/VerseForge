@@ -49,7 +49,7 @@ song localization, and generative audio apps (e.g. Fadr, LALAL.AI).
   endpoint so AutoGen's native client works without a proxy
 - edge-tts, gTTS, yt-dlp
 - SQLite (persistence), FastAPI `BackgroundTasks` job queue
-- n8n (workflow automation), Docker (deployed to Hugging Face Spaces)
+- Streamlit Community Cloud deployment
 
 ## Ops & Cost Involvement
 
@@ -58,9 +58,6 @@ inference-cost and job-orchestration, not experiment tracking)*
 
 - **Job queue with status tracking**: `pending → running → done/error`, polled by the
   frontend, with optional `webhook_url` callbacks on completion for external automation
-- **n8n integration**: backend exposes scan/inbox endpoints so n8n workflows stay to two
-  node types (Schedule Trigger, HTTP Request) — all filesystem/business logic lives in
-  the API, not in n8n nodes
 - **LLM cost controls**: exact-match response caching (input + style + language + script)
   to skip redundant calls; merged critique+revise into one call per loop iteration
   (halves worst-case calls per generation); `REFINE_MAX_ITERATIONS=0` env var for
@@ -81,4 +78,4 @@ inference-cost and job-orchestration, not experiment tracking)*
 - Emotion-tunable TTS mixed with a song's instrumental (paired playback or spoken-word
   overlay)
 - GuitarGPT: text-to-instrument playable virtual keyboard
-- Full FastAPI backend + Streamlit frontend + n8n automation scaffold + Docker packaging
+- Full FastAPI backend + Streamlit frontend + Streamlit Community Cloud deployment

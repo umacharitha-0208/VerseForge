@@ -8,8 +8,6 @@ from backend import db
 from backend.config import (
     DEFAULT_STEM_COUNT,
     GENERATED_DIR,
-    N8N_INBOX_SONGS_DIR,
-    N8N_INBOX_SONGS_PROCESSED_DIR,
     UPLOADS_DIR,
 )
 from backend.schemas import SongSeparateUrlIn
@@ -20,9 +18,6 @@ from backend.services.url_download import download_audio_from_url
 from backend.services.vocal_split import split_lead_background
 
 router = APIRouter(prefix="/api/songs", tags=["songs"])
-
-AUDIO_EXTENSIONS = {".mp3", ".wav", ".flac", ".m4a", ".ogg"}
-
 
 def _do_separate(dest_path: str, title: str, stem_count: str = DEFAULT_STEM_COUNT) -> dict:
     content_hash = db.hash_file(dest_path)
@@ -85,34 +80,6 @@ def separate_url(payload: SongSeparateUrlIn, background_tasks: BackgroundTasks):
         run_job, job_id, _do_download_and_separate, payload.url, title_final, payload.stem_count, heavy=True
     )
     return {"job_id": job_id}
-
-
-class InboxScanIn(BaseModel):
-    stem_count: str = DEFAULT_STEM_COUNT
-    webhook_url: str | None = None
-
-
-@router.post("/separate-from-inbox")
-def separate_from_inbox(payload: InboxScanIn, background_tasks: BackgroundTasks):
-    """Scans N8N_INBOX_SONGS_DIR for new audio files, kicks off a separation job for each, and
-    moves the file to the processed folder. Meant to be called by an n8n Schedule Trigger
-    workflow -- all filesystem work happens here in Python, so n8n's node just has to call this
-    one endpoint rather than watch/read/upload files itself."""
-    created_jobs = []
-    for path in sorted(N8N_INBOX_SONGS_DIR.iterdir()):
-        if not path.is_file() or path.suffix.lower() not in AUDIO_EXTENSIONS:
-            continue
-        dest_path = N8N_INBOX_SONGS_PROCESSED_DIR / path.name
-        shutil.move(str(path), str(dest_path))
-
-        title = path.stem
-        job_id = db.create_job(
-            "separate_song", {"filename": path.name, "title": title, "stem_count": payload.stem_count}, payload.webhook_url
-        )
-        background_tasks.add_task(run_job, job_id, _do_separate, str(dest_path), title, payload.stem_count, heavy=True)
-        created_jobs.append({"job_id": job_id, "filename": path.name})
-
-    return {"scanned": True, "jobs_created": len(created_jobs), "jobs": created_jobs}
 
 
 class SplitVocalsIn(BaseModel):
