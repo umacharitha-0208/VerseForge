@@ -8,6 +8,8 @@ services:
     envVars:
       - key: GEMINI_API_KEY
         sync: false
+      - key: YOUTUBE_COOKIES_B64
+        sync: false
       - key: DEMUCS_MODEL
         value: htdemucs
       - key: WHISPER_MODEL_SIZE

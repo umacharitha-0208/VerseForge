@@ -2,6 +2,9 @@
 be fed through the same pipelines as an uploaded file: full video for analyze_video, or
 audio-only for separate_song."""
 
+import base64
+import os
+import tempfile
 from pathlib import Path
 
 import yt_dlp
@@ -14,11 +17,25 @@ _COMMON_OPTS = {
     "no_warnings": True,
     "progress_hooks": [],
     "noprogress": True,
-    # Prefer clients that do not require browser cookies or a PO token on public videos.
-    "extractor_args": {"youtube": {"player_client": ["web_safari", "tv_embedded"]}},
+    # Try multiple playback profiles before falling back to private cookies.
+    "extractor_args": {"youtube": {"player_client": ["web_safari", "android_vr", "tv_embedded"]}},
     "retries": 3,
     "fragment_retries": 3,
 }
+
+
+def _youtube_options() -> dict:
+    """Add an optional private Netscape cookie file supplied through deployment secrets."""
+    options = dict(_COMMON_OPTS)
+    encoded_cookies = os.environ.get("YOUTUBE_COOKIES_B64", "").strip()
+    if encoded_cookies:
+        try:
+            cookie_path = Path(tempfile.gettempdir()) / "verseforge-youtube-cookies.txt"
+            cookie_path.write_bytes(base64.b64decode(encoded_cookies, validate=True))
+            options["cookiefile"] = str(cookie_path)
+        except (ValueError, OSError) as exc:
+            raise UrlDownloadError("YOUTUBE_COOKIES_B64 is not valid base64 cookie data") from exc
+    return options
 
 
 class UrlDownloadError(RuntimeError):
@@ -31,7 +48,7 @@ def download_video_from_url(url: str) -> tuple[Path, str]:
     to recognize the song purely from keyframes/ASR -- callers should pass it through to the
     lyrics/singer identification step instead of discarding it."""
     ydl_opts = {
-        **_COMMON_OPTS,
+        **_youtube_options(),
         "outtmpl": str(VIDEOS_DIR / "%(id)s.%(ext)s"),
         # Do not require MP4/M4A streams: YouTube may expose only webm or separate
         # adaptive streams for the selected player client.
@@ -49,8 +66,8 @@ def download_video_from_url(url: str) -> tuple[Path, str]:
             return dest_path, (info.get("title") or "")
     except yt_dlp.utils.DownloadError as e:
         raise UrlDownloadError(
-            "YouTube blocked this request from the Streamlit Cloud server. "
-            "Try uploading the audio/video file instead, or use a publicly accessible URL. "
+            "YouTube requires bot verification for this server. Configure a valid private "
+            "YOUTUBE_COOKIES_B64 secret on the backend, or upload the audio/video file instead. "
             f"Details: {e}"
         ) from e
 
@@ -60,7 +77,7 @@ def download_audio_from_url(url: str) -> tuple[Path, str]:
     Returns (file_path, title) -- see download_video_from_url's docstring on why the title
     matters for identification."""
     ydl_opts = {
-        **_COMMON_OPTS,
+        **_youtube_options(),
         "outtmpl": str(UPLOADS_DIR / "%(id)s.%(ext)s"),
         "format": "bestaudio/best",
         "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "wav"}],
@@ -74,7 +91,7 @@ def download_audio_from_url(url: str) -> tuple[Path, str]:
             return dest_path, (info.get("title") or "")
     except yt_dlp.utils.DownloadError as e:
         raise UrlDownloadError(
-            "YouTube blocked this request from the Streamlit Cloud server. "
-            "Try uploading the audio file instead, or use a publicly accessible URL. "
+            "YouTube requires bot verification for this server. Configure a valid private "
+            "YOUTUBE_COOKIES_B64 secret on the backend, or upload the audio file instead. "
             f"Details: {e}"
         ) from e

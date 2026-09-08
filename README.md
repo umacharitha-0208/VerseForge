@@ -307,6 +307,15 @@ Use a persistent volume mounted at `/app` or a model cache directory if you want
 re-downloading Demucs and Whisper weights after the Pod stops. A Pod must remain running while
 the Streamlit app uses it; stopping the Pod makes the backend URL unavailable.
 
+#### YouTube bot verification
+
+YouTube may require an authenticated browser session even when yt-dlp runs on Render. If the
+backend reports `Sign in to confirm you're not a bot`, export your own YouTube cookies in
+Netscape format, base64-encode the file, and add the result as the private Render variable
+`YOUTUBE_COOKIES_B64`. Never commit the cookie file or its encoded value to GitHub. Cookies expire
+and must be replaced when YouTube rejects them. This is optional and does not guarantee access
+when YouTube blocks the hosting provider's IP range.
+
 ## Runtime and deployment limitations
 
 - Streamlit Community Cloud is CPU-only for this workload, so Demucs and Whisper may be slow.
