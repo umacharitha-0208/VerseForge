@@ -1,12 +1,9 @@
 import re
 from pathlib import Path
 
-import torch
-from faster_whisper import WhisperModel
-
 from backend.config import WHISPER_MODEL_SIZE
 
-_model: WhisperModel | None = None
+_model = None
 
 # Whisper emits placeholder segments like "...", "..", "-", or music-note glyphs for stretches
 # it can't confidently transcribe (typically instrumental/background-music sections, not
@@ -15,9 +12,17 @@ _model: WhisperModel | None = None
 _FILLER_ONLY_RE = re.compile(r"^[.\s…\-–—♪♫♪♫]*$")
 
 
-def _get_model() -> WhisperModel:
+def _get_model():
     global _model
     if _model is None:
+        try:
+            import torch
+            from faster_whisper import WhisperModel
+        except ImportError as exc:
+            raise RuntimeError(
+                "Transcription is unavailable in the Streamlit deployment because the optional "
+                "Whisper/PyTorch packages are not installed."
+            ) from exc
         device = "cuda" if torch.cuda.is_available() else "cpu"
         compute_type = "float16" if device == "cuda" else "int8"
         _model = WhisperModel(WHISPER_MODEL_SIZE, device=device, compute_type=compute_type)

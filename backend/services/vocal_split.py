@@ -11,7 +11,6 @@ struggles on unison-doubled leads or when backing vocals are just as loud/tonal 
 
 from pathlib import Path
 
-import librosa
 import numpy as np
 import soundfile as sf
 
@@ -31,6 +30,8 @@ def _fit_length(arr: np.ndarray, n: int, fill: float = np.nan) -> np.ndarray:
 
 
 def split_lead_background(vocals_path: Path, out_dir: Path) -> dict[str, Path]:
+    import librosa
+
     y, sr = librosa.load(str(vocals_path), sr=None, mono=True)
 
     stft = librosa.stft(y, n_fft=N_FFT, hop_length=HOP_LENGTH)

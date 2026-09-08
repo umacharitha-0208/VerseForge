@@ -3,8 +3,6 @@ import json
 import subprocess
 from pathlib import Path
 
-import cv2
-import librosa
 import numpy as np
 
 from backend.services.agent_loop import identify_and_format_lyrics, refine_video_analysis
@@ -14,6 +12,8 @@ from backend.services.transcription import transcribe
 
 def extract_keyframes(video_path: Path, num_frames: int = 6) -> list[str]:
     """Sample num_frames evenly across the video, return list of base64 JPEG strings."""
+    import cv2
+
     cap = cv2.VideoCapture(str(video_path))
     total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     frames_b64 = []
@@ -47,6 +47,8 @@ def extract_audio(video_path: Path, out_audio_path: Path) -> Path:
 
 
 def compute_music_features(audio_path: Path) -> dict:
+    import librosa
+
     y, sr = librosa.load(str(audio_path), sr=None, mono=True)
     if y.size == 0:
         return {"tempo_bpm": None, "energy_rms": None, "brightness_hz": None}

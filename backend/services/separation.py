@@ -2,8 +2,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import torch
-
 from backend.config import DEFAULT_STEM_COUNT, DEMUCS_MODELS, STEMS_DIR
 
 
@@ -14,6 +12,13 @@ class SeparationError(RuntimeError):
 def separate_song(input_path: Path, stem_count: str = DEFAULT_STEM_COUNT) -> dict[str, Path]:
     """Run Demucs on input_path, return {stem_name: wav_path}. stem_count selects between the
     4-stem (vocals/drums/bass/other) and 6-stem (+guitar/piano) pretrained models."""
+    try:
+        import torch
+    except ImportError as exc:
+        raise SeparationError(
+            "Song separation is unavailable in the Streamlit deployment because the optional "
+            "Demucs/PyTorch packages are not installed."
+        ) from exc
     if stem_count not in DEMUCS_MODELS:
         raise ValueError(f"Unknown stem_count {stem_count!r}, expected one of {list(DEMUCS_MODELS)}")
     model = DEMUCS_MODELS[stem_count]["name"]

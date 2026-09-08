@@ -1,4 +1,3 @@
-import torch
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -33,7 +32,12 @@ def root():
 
 @app.get("/api/status")
 def status():
+    try:
+        import torch
+        gpu_available = torch.cuda.is_available()
+    except ImportError:
+        gpu_available = False
     return {
         "llm_configured": bool(GEMINI_API_KEY),
-        "gpu_available": torch.cuda.is_available(),
+        "gpu_available": gpu_available,
     }
