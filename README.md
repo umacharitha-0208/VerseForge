@@ -1,3 +1,12 @@
+---
+title: VerseForge API
+emoji: 🎵
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7860
+---
+
 # VerseForge
 
 VerseForge is a multimodal AI music production platform for creators who want to separate
