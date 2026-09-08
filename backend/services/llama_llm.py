@@ -5,21 +5,25 @@ client rather than through this module."""
 
 import base64
 
-from llama_index.core.llms import ChatMessage, ImageBlock, TextBlock
-from llama_index.llms.google_genai import GoogleGenAI
-
 from backend.config import GEMINI_API_KEY, LLM_MODEL
 
-_llm: GoogleGenAI | None = None
+_llm = None
 
 
 class LLMNotConfiguredError(RuntimeError):
     pass
 
 
-def _get_llm() -> GoogleGenAI:
+def _get_llm():
     global _llm
     if _llm is None:
+        try:
+            from llama_index.llms.google_genai import GoogleGenAI
+        except ImportError as exc:
+            raise LLMNotConfiguredError(
+                "Gemini generation is unavailable in this deployment because the optional "
+                "LlamaIndex Gemini package is not installed."
+            ) from exc
         if not GEMINI_API_KEY:
             raise LLMNotConfiguredError(
                 "GEMINI_API_KEY is not set. Copy .env.example to .env and add your key."
@@ -35,6 +39,8 @@ def complete(prompt: str) -> str:
 
 
 def complete_with_images(text_prompt: str, frames_b64: list[str]) -> str:
+    from llama_index.core.llms import ChatMessage, ImageBlock, TextBlock
+
     llm = _get_llm()
     blocks = [TextBlock(text=text_prompt)]
     for frame_b64 in frames_b64:

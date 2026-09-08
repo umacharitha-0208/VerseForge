@@ -23,8 +23,6 @@ import json
 import re
 from dataclasses import asdict, dataclass, field
 
-from autogen import ConversableAgent
-
 from backend.config import (
     GEMINI_API_KEY,
     GEMINI_OPENAI_BASE_URL,
@@ -46,7 +44,7 @@ def _autogen_llm_config() -> dict:
     }
 
 
-def _agent_reply(agent: ConversableAgent, message: str) -> str:
+def _agent_reply(agent, message: str) -> str:
     reply = agent.generate_reply(messages=[{"role": "user", "content": message}])
     if isinstance(reply, dict):
         return (reply.get("content") or "").strip()
@@ -81,7 +79,7 @@ class RefineResult:
 
 
 def _run_editor_loop(
-    editor: ConversableAgent,
+    editor,
     initial_content: str,
     max_iterations: int,
     score_threshold: int,
@@ -152,6 +150,14 @@ def refine_lyrics(
 
     if max_iterations <= 0:
         return RefineResult(final_text=draft, iterations=[RefineIteration(step="draft", content=draft)])
+
+    try:
+        from autogen import ConversableAgent
+    except ImportError as exc:
+        raise RuntimeError(
+            "Lyrics refinement is unavailable in this deployment because the optional "
+            "AutoGen package is not installed."
+        ) from exc
 
     editor = ConversableAgent(
         name="LyricsEditor",
