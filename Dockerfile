@@ -15,5 +15,5 @@ RUN pip install --upgrade pip \
 
 COPY . .
 
-EXPOSE 7860
+EXPOSE 8000 7860
 CMD uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-7860}

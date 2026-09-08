@@ -275,6 +275,38 @@ The Space must be running before Streamlit submits a YouTube job. Free CPU Space
 for Demucs and Whisper and can sleep; a persistent or upgraded Space is recommended for regular
 use. Do not set `BACKEND_BASE_URL` to `127.0.0.1` in Streamlit Cloud.
 
+### RunPod GPU backend
+
+RunPod is a better fit when Demucs and Whisper need GPU acceleration. Use a regular **GPU Pod**
+for this repository, not a Serverless Endpoint: the existing FastAPI application is a long-running
+HTTP service.
+
+1. Create a RunPod GPU Pod with a PyTorch image or Docker deployment from this repository.
+2. Expose TCP port `8000` in the Pod's networking settings.
+3. Set the Pod environment variable `PORT=8000`.
+4. Start the container with:
+
+```bash
+uvicorn backend.main:app --host 0.0.0.0 --port 8000
+```
+
+5. Wait for the container to finish installing dependencies and download the model weights on
+   the first job.
+6. Copy the RunPod HTTP proxy URL, which looks like:
+   `https://<pod-id>-8000.proxy.runpod.net`.
+7. Set this URL in Streamlit Cloud Secrets:
+
+```toml
+BACKEND_BASE_URL = "https://<pod-id>-8000.proxy.runpod.net"
+GEMINI_API_KEY = "your-gemini-key"
+```
+
+8. Verify `<runpod-url>/api/status` before submitting a YouTube link.
+
+Use a persistent volume mounted at `/app` or a model cache directory if you want to avoid
+re-downloading Demucs and Whisper weights after the Pod stops. A Pod must remain running while
+the Streamlit app uses it; stopping the Pod makes the backend URL unavailable.
+
 ## Runtime and deployment limitations
 
 - Streamlit Community Cloud is CPU-only for this workload, so Demucs and Whisper may be slow.
