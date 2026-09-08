@@ -228,16 +228,22 @@ as `BACKEND_BASE_URL` in Streamlit Secrets. The backend health check is `<backen
 
 ### Render backend
 
-1. Create a new **Web Service** from `umacharitha-0208/VerseForge`.
-2. Use Docker deployment and the repository `Dockerfile`.
-3. Add `GEMINI_API_KEY` as a backend environment variable.
-4. Deploy and copy the generated `https://...onrender.com` URL.
-5. Put this in Streamlit Secrets:
+The repository includes `render.yaml`, so the backend can be created as a Render Blueprint:
+
+1. In Render, choose **New -> Blueprint** and select this repository.
+2. Set the prompted `GEMINI_API_KEY` value and deploy `verseforge-api`.
+3. Copy the generated `https://...onrender.com` URL.
+4. Put this in Streamlit Secrets:
 
 ```toml
 GEMINI_API_KEY = "your-gemini-key"
 BACKEND_BASE_URL = "https://your-backend.onrender.com"
 ```
+
+Do not set `BACKEND_BASE_URL` to `127.0.0.1` in the Streamlit deployment. The Streamlit app
+forwards URL jobs to the public FastAPI service, so yt-dlp runs from the backend host rather
+than from Streamlit Community Cloud's shared IP range. The backend's health check is
+`<backend-url>/api/status`.
 
 ## Runtime and deployment limitations
 

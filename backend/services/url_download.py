@@ -33,7 +33,9 @@ def download_video_from_url(url: str) -> tuple[Path, str]:
     ydl_opts = {
         **_COMMON_OPTS,
         "outtmpl": str(VIDEOS_DIR / "%(id)s.%(ext)s"),
-        "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
+        # Do not require MP4/M4A streams: YouTube may expose only webm or separate
+        # adaptive streams for the selected player client.
+        "format": "bv*+ba/b",
         "merge_output_format": "mp4",
     }
     try:

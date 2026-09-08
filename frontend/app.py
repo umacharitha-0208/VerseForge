@@ -11,6 +11,13 @@ try:
 except Exception as exc:
     st.warning(f"The backend is unavailable: {exc}")
 
+if api_client.BASE_URL.startswith(("http://127.0.0.1", "http://localhost")):
+    st.error(
+        "This Streamlit deployment is using a local backend. Set BACKEND_BASE_URL in "
+        "Streamlit Secrets to the public FastAPI URL (for example, your Render URL) "
+        "before using YouTube links."
+    )
+
 st.title("🎵 VerseForge")
 st.markdown(
     """
