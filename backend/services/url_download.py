@@ -17,8 +17,8 @@ _COMMON_OPTS = {
     "no_warnings": True,
     "progress_hooks": [],
     "noprogress": True,
-    # Try multiple playback profiles before falling back to private cookies.
-    "extractor_args": {"youtube": {"player_client": ["web_safari", "android_vr", "tv_embedded"]}},
+    # Let the installed yt-dlp release select its current compatible YouTube clients.
+    # Hard-coding clients becomes brittle as YouTube changes player responses.
     "retries": 3,
     "fragment_retries": 3,
 }
