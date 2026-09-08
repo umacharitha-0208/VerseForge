@@ -14,9 +14,10 @@ _COMMON_OPTS = {
     "no_warnings": True,
     "progress_hooks": [],
     "noprogress": True,
-    # YouTube's default web client increasingly returns 403 on formats that need a PO token;
-    # the android/ios clients serve formats that don't require one.
-    "extractor_args": {"youtube": {"player_client": ["android", "ios", "web"]}},
+    # Prefer clients that do not require browser cookies or a PO token on public videos.
+    "extractor_args": {"youtube": {"player_client": ["web_safari", "tv_embedded"]}},
+    "retries": 3,
+    "fragment_retries": 3,
 }
 
 
@@ -45,7 +46,11 @@ def download_video_from_url(url: str) -> tuple[Path, str]:
                 raise UrlDownloadError(f"Downloaded file not found at expected path: {dest_path}")
             return dest_path, (info.get("title") or "")
     except yt_dlp.utils.DownloadError as e:
-        raise UrlDownloadError(f"Failed to download video from {url}: {e}") from e
+        raise UrlDownloadError(
+            "YouTube blocked this request from the Streamlit Cloud server. "
+            "Try uploading the audio/video file instead, or use a publicly accessible URL. "
+            f"Details: {e}"
+        ) from e
 
 
 def download_audio_from_url(url: str) -> tuple[Path, str]:
@@ -66,4 +71,8 @@ def download_audio_from_url(url: str) -> tuple[Path, str]:
                 raise UrlDownloadError(f"Downloaded file not found at expected path: {dest_path}")
             return dest_path, (info.get("title") or "")
     except yt_dlp.utils.DownloadError as e:
-        raise UrlDownloadError(f"Failed to download audio from {url}: {e}") from e
+        raise UrlDownloadError(
+            "YouTube blocked this request from the Streamlit Cloud server. "
+            "Try uploading the audio file instead, or use a publicly accessible URL. "
+            f"Details: {e}"
+        ) from e
