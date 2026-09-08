@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 from urllib.parse import urlparse
@@ -25,7 +26,9 @@ def ensure_backend(base_url: str) -> None:
 
     port = str(parsed.port or 8000)
     project_root = Path(__file__).resolve().parent.parent
-    log_path = Path(os.environ.get("BACKEND_LOG_PATH", str(project_root / "backend.log")))
+    log_path = Path(
+        os.environ.get("BACKEND_LOG_PATH", str(Path(tempfile.gettempdir()) / "verseforge-backend.log"))
+    )
     log_path.parent.mkdir(parents=True, exist_ok=True)
     log_file = log_path.open("a", encoding="utf-8")
     subprocess.Popen(

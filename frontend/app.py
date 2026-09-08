@@ -6,7 +6,10 @@ from theme import apply_theme
 
 st.set_page_config(page_title="VerseForge", page_icon="🎵", layout="wide")
 apply_theme()
-ensure_backend(api_client.BASE_URL)
+try:
+    ensure_backend(api_client.BASE_URL)
+except Exception as exc:
+    st.warning(f"The backend is unavailable: {exc}")
 
 st.title("🎵 VerseForge")
 st.markdown(
