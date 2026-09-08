@@ -245,6 +245,27 @@ forwards URL jobs to the public FastAPI service, so yt-dlp runs from the backend
 than from Streamlit Community Cloud's shared IP range. The backend's health check is
 `<backend-url>/api/status`.
 
+### Hugging Face Docker Space backend
+
+Hugging Face Spaces can run this repository's Docker backend. This keeps Streamlit Cloud as
+the frontend while YouTube downloads, Demucs, and Whisper run from the Space's server.
+
+1. Create a new Hugging Face Space with **Docker** as the SDK.
+2. Push this repository to the Space, or import the GitHub repository.
+3. In the Space settings, add `GEMINI_API_KEY` as a secret.
+4. Wait for the Docker build to finish. The API listens on port `7860`.
+5. Check `https://<user>-<space>.hf.space/api/status` in a browser.
+6. Set this value in Streamlit Cloud Secrets:
+
+```toml
+BACKEND_BASE_URL = "https://<user>-<space>.hf.space"
+GEMINI_API_KEY = "your-gemini-key"
+```
+
+The Space must be running before Streamlit submits a YouTube job. Free CPU Spaces may be slow
+for Demucs and Whisper and can sleep; a persistent or upgraded Space is recommended for regular
+use. Do not set `BACKEND_BASE_URL` to `127.0.0.1` in Streamlit Cloud.
+
 ## Runtime and deployment limitations
 
 - Streamlit Community Cloud is CPU-only for this workload, so Demucs and Whisper may be slow.

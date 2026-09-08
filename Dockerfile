@@ -9,11 +9,11 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY requirements.txt ./
+COPY requirements.txt requirements-backend.txt ./
 RUN pip install --upgrade pip \
-    && pip install -r requirements.txt
+    && pip install -r requirements-backend.txt
 
 COPY . .
 
-EXPOSE 8000
-CMD uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}
+EXPOSE 7860
+CMD uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-7860}
