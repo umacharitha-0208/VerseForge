@@ -3,7 +3,7 @@ torch
 torchaudio
 demucs
 faster-whisper
-opencv-python
+opencv-python-headless
 librosa
 soundfile
 pydub

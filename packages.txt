@@ -1,0 +1,4 @@
+ffmpeg
+fluidsynth
+libfluidsynth-dev
+libsndfile1
