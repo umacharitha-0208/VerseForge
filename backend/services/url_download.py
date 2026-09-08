@@ -31,11 +31,27 @@ def _youtube_options() -> dict:
     if encoded_cookies:
         try:
             cookie_path = Path(tempfile.gettempdir()) / "verseforge-youtube-cookies.txt"
-            cookie_path.write_bytes(base64.b64decode(encoded_cookies, validate=True))
+            cookie_data = base64.b64decode(encoded_cookies, validate=True)
+            if b"# Netscape HTTP Cookie File" not in cookie_data:
+                raise ValueError("cookie data is not Netscape format")
+            cookie_path.write_bytes(cookie_data)
             options["cookiefile"] = str(cookie_path)
         except (ValueError, OSError) as exc:
-            raise UrlDownloadError("YOUTUBE_COOKIES_B64 is not valid base64 cookie data") from exc
+            raise UrlDownloadError(
+                "YOUTUBE_COOKIES_B64 is not valid base64 Netscape cookie data"
+            ) from exc
     return options
+
+
+def youtube_cookies_configured() -> bool:
+    """Return whether the deployment secret decodes to a Netscape cookie export."""
+    encoded_cookies = os.environ.get("YOUTUBE_COOKIES_B64", "").strip()
+    if not encoded_cookies:
+        return False
+    try:
+        return b"# Netscape HTTP Cookie File" in base64.b64decode(encoded_cookies, validate=True)
+    except (ValueError, TypeError):
+        return False
 
 
 class UrlDownloadError(RuntimeError):

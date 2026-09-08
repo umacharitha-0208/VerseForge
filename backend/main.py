@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.config import GEMINI_API_KEY
 from backend.db import init_db
 from backend.routers import instruments, jobs, library, lyrics, mixes, songs, videos
+from backend.services.url_download import youtube_cookies_configured
 
 app = FastAPI(title="VerseForge API")
 
@@ -40,4 +41,5 @@ def status():
     return {
         "llm_configured": bool(GEMINI_API_KEY),
         "gpu_available": gpu_available,
+        "youtube_cookies_configured": youtube_cookies_configured(),
     }
