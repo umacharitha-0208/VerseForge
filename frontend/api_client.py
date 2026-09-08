@@ -4,7 +4,25 @@ import urllib.parse
 
 import requests
 
-BASE_URL = os.environ.get("BACKEND_BASE_URL", "http://127.0.0.1:8000")
+try:
+    import streamlit as st
+except ImportError:
+    st = None
+
+
+def _configured_backend_url() -> str:
+    url = os.environ.get("BACKEND_BASE_URL")
+    if url:
+        return url.rstrip("/")
+    if st is not None:
+        try:
+            return str(st.secrets.get("BACKEND_BASE_URL", "http://127.0.0.1:8000")).rstrip("/")
+        except Exception:
+            pass
+    return "http://127.0.0.1:8000"
+
+
+BASE_URL = _configured_backend_url()
 
 
 def _url(path: str) -> str:

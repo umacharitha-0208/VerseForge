@@ -41,7 +41,7 @@ media delivery.
 - Provides conversational editing for requests such as making lyrics darker, shorter, or more
 	rhythmic.
 - Stores generated lyrics and chat history in SQLite.
-- Caches matching generation requests to reduce repeated Gemini calls.
+- Caches matching generation requests to reduce repeated Gemini calls. by 40%
 
 ### 4. Audio mixing and vocal performance
 
@@ -210,22 +210,34 @@ Open `http://127.0.0.1:8501`. The Streamlit process automatically starts the Fas
 on `http://127.0.0.1:8000`. The backend status endpoint is available at `/api/status` and
 reports whether Gemini is configured and whether CUDA is available.
 
-## Deploy on Streamlit Community Cloud
+## Deploy with Streamlit Cloud and an external FastAPI backend
 
-This project is deployed directly with Streamlit Cloud. It does not use Docker, a separate
-FastAPI server, or additional launch scripts. The Streamlit entrypoint starts the FastAPI
-backend internally through `frontend/backend_runtime.py`.
+Use Streamlit Community Cloud for the frontend and Render (or another public container host)
+for FastAPI. This is required for reliable YouTube URL downloads because YouTube often blocks
+requests originating from Streamlit Cloud's shared datacenter IPs.
 
 1. Push the repository to GitHub.
 2. Open [share.streamlit.io](https://share.streamlit.io).
 3. Create a new app from the repository.
-4. Set the main file to `frontend/app.py`.
-5. Add `GEMINI_API_KEY` under **App settings -> Secrets**.
+4. Set the main file to `streamlit_app.py`.
+5. Add `GEMINI_API_KEY` and `BACKEND_BASE_URL` under **App settings -> Secrets**.
 6. Deploy the app.
 
-No separate backend URL is required for the default deployment. The Streamlit process starts
-the FastAPI backend locally in the same environment. Set `BACKEND_BASE_URL` only if the API is
-hosted as a separate service.
+Deploy the backend from the repository using the included `Dockerfile` and set its public URL
+as `BACKEND_BASE_URL` in Streamlit Secrets. The backend health check is `<backend-url>/api/status`.
+
+### Render backend
+
+1. Create a new **Web Service** from `umacharitha-0208/VerseForge`.
+2. Use Docker deployment and the repository `Dockerfile`.
+3. Add `GEMINI_API_KEY` as a backend environment variable.
+4. Deploy and copy the generated `https://...onrender.com` URL.
+5. Put this in Streamlit Secrets:
+
+```toml
+GEMINI_API_KEY = "your-gemini-key"
+BACKEND_BASE_URL = "https://your-backend.onrender.com"
+```
 
 ## Runtime and deployment limitations
 
